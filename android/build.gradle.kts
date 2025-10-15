@@ -1,0 +1,44 @@
+
+import org.gradle.api.tasks.Delete
+import org.gradle.api.file.Directory
+
+buildscript {
+    repositories {
+        google()
+        // FIX 1: Add mavenCentral() to find the google-services plugin
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        // This line is correct
+        classpath("com.google.gms:google-services:4.4.3")
+    }
+}
+
+allprojects {
+    repositories {
+        // FIX 2: Correct the typo from googleid() to google()
+        google()
+        mavenCentral()
+    }
+}
+
+// No changes needed below this line
+val newBuildDir: Directory =
+    rootProject.layout.buildDirectory
+        .dir("../../build")
+        .get()
+rootProject.layout.buildDirectory.value(newBuildDir)
+
+subprojects {
+    val newSubprojectBuildDir: Directory = newBuildDir.dir(project.name)
+    project.layout.buildDirectory.value(newSubprojectBuildDir)
+}
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+tasks.register<Delete>("clean") {
+    delete(rootProject.layout.buildDirectory)
+}
+
